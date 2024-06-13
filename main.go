@@ -10,17 +10,19 @@ import (
 )
 
 func main() {
-	copySaves()
-	insertSaves()
+	if copySaves() && insertSaves() {
+		fmt.Println("Transfer completed successfully")
+	}
+	fmt.Scanln()
 }
 
-func copySaves() {
+func copySaves() bool {
 
 	savesPath := scanRow(0)
 	files, err := os.ReadDir(savesPath)
 	if err != nil {
 		fmt.Printf("Failed to read files in %s: %s\n", savesPath, err)
-		return
+		return false
 	}
 
 	for _, file := range files {
@@ -38,18 +40,20 @@ func copySaves() {
 
 		if !copyFile(filePath, copyPath) {
 			fmt.Printf("Failed to copy %s to %s\n", fileName, copyPath)
+			return false
 		}
 
 	}
+	return true
 }
 
-func insertSaves() {
+func insertSaves() bool {
 
 	copyPath := scanRow(1)
 	newFiles, err := os.ReadDir(copyPath)
 	if err != nil {
 		fmt.Printf("Failed to read files in %s: %s\n", copyPath, err)
-		return
+		return false
 	}
 
 	var playerId string
@@ -77,10 +81,11 @@ func insertSaves() {
 
 		if !copyFile(oldPath, newPath) {
 			fmt.Printf("Failed to copy %s to %s\n", oldPath, newPath)
+			return false
 		}
 
 	}
-
+	return true
 }
 
 func scanRow(row int) string {
