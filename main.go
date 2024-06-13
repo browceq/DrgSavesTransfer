@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	if copySaves() && insertSaves() {
+	if copySaves() && insertSaves() && copyConfig() {
 		fmt.Println("Transfer completed successfully")
 	}
 	fmt.Scanln()
@@ -18,7 +18,7 @@ func main() {
 
 func copySaves() bool {
 
-	savesPath := scanRow(0)
+	savesPath := scanRow(0, "save")
 	files, err := os.ReadDir(savesPath)
 	if err != nil {
 		fmt.Printf("Failed to read files in %s: %s\n", savesPath, err)
@@ -49,7 +49,7 @@ func copySaves() bool {
 
 func insertSaves() bool {
 
-	copyPath := scanRow(1)
+	copyPath := scanRow(1, "save")
 	newFiles, err := os.ReadDir(copyPath)
 	if err != nil {
 		fmt.Printf("Failed to read files in %s: %s\n", copyPath, err)
@@ -88,7 +88,14 @@ func insertSaves() bool {
 	return true
 }
 
-func scanRow(row int) string {
+func copyConfig() bool {
+	if !copyFile(scanRow(0, "config"), scanRow(1, "config")) {
+		return false
+	}
+	return true
+}
+
+func scanRow(row int, mode string) string {
 	path := "paths.txt"
 
 	file, err := os.Open(path)
@@ -100,11 +107,17 @@ func scanRow(row int) string {
 	scanner := bufio.NewScanner(file)
 	currentRow := 0
 	for scanner.Scan() {
-		if currentRow == row {
-			line := scanner.Text()
-			return line
+		if currentRow != row {
+			currentRow++
+			continue
 		}
-		currentRow++
+		line := scanner.Text()
+		if mode == "save" {
+			return line + "\\FSD\\Saved\\SaveGames"
+		}
+		if mode == "config" {
+			return line + "\\FSD\\Saved\\Config\\WindowsNoEditor\\GameUserSettings.ini"
+		}
 	}
 	return ""
 }
